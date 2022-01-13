@@ -57,6 +57,9 @@ while True:
                       f"?layout=pro&theme=dark"
                 tg_url = f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id=-1001706274303&text={msg}'
                 requests.get(url = tg_url)
+                if gain <= -3 and usd_vol_increase >= 200 and quote_asset_volume >= 10_000:
+                    tg_url = f'Hey!'
+                    requests.get(url = tg_url)
             if gain >= best_gain[1]:
                 best_gain = (coin['symbol'], gain)
             print(f"{best_gain=} |> {symbol=}, {gain=}, {ts=}, {ts_end=}")
