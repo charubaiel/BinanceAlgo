@@ -48,11 +48,11 @@ while True:
 
             ts_end = datetime.utcfromtimestamp(int(ts_end/1000)).strftime('%Y-%m-%d %H:%M:%S')
             symbol = coin['symbol']
-            if gain <= -3 or gain >= 3 or (usd_vol_increase >= 1000 and quote_asset_volume >= 100_000):
+            if gain <= -3 or gain >= 3 or (usd_vol_increase >= 10_000 and quote_asset_volume >= 1_000_000):
                 msg = f"Binance minute monitoring\n\nSymbol: {symbol}\nCost growth: {gain=}%\n" \
                       f"Volume: {quote_asset_volume} USDT ({usd_vol_increase}%)\n" \
                       f"Number of trades: {number_of_trades} ({number_of_trades_increase}%)\n" \
-                      f"UTC start: {ts}\nUTC end: {ts_end=}\n\n" \
+                      f"UTC start: {ts}\nUTC end: {ts_end}\n\n" \
                       f"https://www.binance.com/en/trade/{coin['symbol'].replace('USDT', '_USDT')}" \
                       f"?layout=pro&theme=dark"
                 tg_url = f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id=-1001706274303&text={msg}'
