@@ -32,7 +32,7 @@ def bn_get_candle(symbol, ts_start, ts_end):
     url = f'https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1m&limit=1000&startTime={ts_start}&endTime={ts_end}'
     response = requests.get(url = url)
     candle_data = json.loads(response.text)
-    if candle_data:
+    if candle_data or candle_data == []:
         return candle_data
     else:
         raise ValueError(f'Empty data: {url}')
