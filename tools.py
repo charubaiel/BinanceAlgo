@@ -48,6 +48,12 @@ def ch_insert(data: list, table: str):
 
     if out.status_code == 200 and data:
         return
+    if out.status_code == 500 and 'not enough space' in out.text:
+        requests.post(url = f"{os.getenv('ch_url')}",
+                      data = f'OPTIMIZE TABLE {table} FINAL'.encode('utf-8'),
+                      auth = ('ch', os.getenv('ch_ch')))
+        print('sleep 30')
+        sleep(30)
     else:
         raise ValueError(out.status_code, out.text)
 
