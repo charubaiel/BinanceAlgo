@@ -31,8 +31,7 @@ q = f'''
 print(q)
 symbol_ready_list = [i[0] for i in ch_select(q)]
 
-print(symbol_ready_list)
-exit()
+
 
 for coin in assets_raw:
     if (
