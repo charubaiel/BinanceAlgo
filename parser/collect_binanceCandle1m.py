@@ -6,7 +6,6 @@ from tools import ch_insert, bn_get_candle, ch_select
 import pandas as pd
 
 
-
 url_ticker = 'https://api.binance.com/api/v3/ticker/bookTicker'
 response = requests.get(url = url_ticker)
 assets_raw = json.loads(response.text)

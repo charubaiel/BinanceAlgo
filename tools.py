@@ -10,8 +10,6 @@ import requests
 
 
 
-
-
 def try_5_times(func, tries = 5, delay = 3):
     def wraper(*args, **kwargs):
         for t in range(tries):
