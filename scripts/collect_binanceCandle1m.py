@@ -10,8 +10,8 @@ import pandas as pd
 url_ticker = 'https://api.binance.com/api/v3/ticker/bookTicker'
 response = requests.get(url = url_ticker)
 assets_raw = json.loads(response.text)
-start = datetime.strptime('2021-11-01', '%Y-%m-%d')
-end = datetime.strptime('2022-01-18', '%Y-%m-%d')
+start = datetime.strptime('2022-01-18', '%Y-%m-%d')
+end = datetime.strptime('2022-01-26', '%Y-%m-%d')
 eds = pd.date_range(start, end, freq = '12H')
 
 q = f'''
