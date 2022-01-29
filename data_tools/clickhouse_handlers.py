@@ -5,8 +5,11 @@ import pandas as pd
 from time import sleep
 import os
 import requests
-from color_loger import log
+from data_tools.color_loger import log
 
+
+def test():
+    log.info('hi')
 
 def try_5_times(func, tries = 5, delay = 3):
     def wraper(*args, **kwargs):
