@@ -59,12 +59,15 @@ def ch_insert(data: list, table: str):
 
 
 # @try_5_times
-def ch_select(query):
+def ch_select(query, format='json'):
+    ch_format = 'CSVWithNames' if format == 'df' else 'JSONCompact'
     out = requests.post(url = f"{os.getenv('ch_url')}",
-                        data = (query + 'FORMAT  JSONCompact').encode('utf-8'),
+                        data = (query + f'FORMAT {ch_format}').encode('utf-8'),
                         auth = ('ch', os.getenv('ch_ch')))
     if out.status_code == 200 and out.text != '':
-        # return pd.read_csv(BytesIO(out.content))
-        return json.loads(out.content)['data']
+        if format == 'df':
+            return pd.read_csv(BytesIO(out.content))
+        else:
+            return json.loads(out.content)['data']
     else:
         raise Exception(f'\nStatus: {out.status_code}\n{out.text}')
