@@ -8,7 +8,6 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 
-
 log = logging.getLogger()
 log.setLevel(logging.INFO)
 ch = logging.StreamHandler()
