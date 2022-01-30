@@ -8,9 +8,6 @@ import requests
 from data_tools.color_loger import log
 
 
-def test():
-    log.info('hi')
-
 def try_5_times(func, tries = 5, delay = 3):
     def wraper(*args, **kwargs):
         for t in range(tries):
@@ -21,7 +18,7 @@ def try_5_times(func, tries = 5, delay = 3):
 
             except Exception as e:
                 if tries - t != 1:
-                    log.warning(f'attempt {t + 1}/{tries} failed, sleep {delay} seconds. Error: \n{e}')
+                    log.warning(f'Attempt {t + 1}/{tries} failed, sleep {delay} seconds. Error: \n{e}')
 
                     sleep(delay)
                 else:
@@ -62,7 +59,7 @@ def ch_insert(data: list, table: str) -> None:
         requests.post(url = f"{os.getenv('ch_url')}", data = f'OPTIMIZE TABLE {table} FINAL'.encode('utf-8'),
                       auth = ('ch', os.getenv('ch_ch')))
 
-        log.info('sleeped for 30 sec')
+        log.info('Sleep for 30 sec')
         sleep(30)
 
     else:
@@ -72,11 +69,9 @@ def ch_insert(data: list, table: str) -> None:
 
 @try_5_times
 def ch_select(query: str) -> pd.DataFrame:
-    ch_format = 'CSVWithNames' if format == 'df' else 'JSONCompact'
+    data = (query + f'\nFORMAT CSVWithNames').encode('utf-8')
 
-    data = (query + f'FORMAT {ch_format}').encode('utf-8')
-
-    out = requests.post(url = f"{os.getenv('ch_url')}", data = data, auth = ('ch', os.getenv('ch_ch')))
+    out = requests.post(url=f"{os.getenv('ch_url')}", data=data, auth=('ch', os.getenv('ch_ch')))
 
     if out.status_code == 200 and out.text != '':
 
