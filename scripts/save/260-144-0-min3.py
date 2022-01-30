@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from tools import ch_select
-
+from tqdm import tqdm
 
 
 
@@ -75,9 +75,9 @@ def find_smoothly_growing_time_frames(
     '''
 
 
-    # df = pd.read_pickle('tmp.pkl')
-    df = ch_select(raw_data_query, 'df')
-    df.to_pickle('tmp.pkl')
+    df = pd.read_pickle('tmp.pkl')
+    # df = ch_select(raw_data_query, 'df')
+    # df.to_pickle('tmp.pkl')
     ttl_rows = df.shape[0]
     print(f'{ttl_rows=}')
 
@@ -106,9 +106,9 @@ def find_smoothly_growing_time_frames(
         print("Successfully created the directory %s " % path)
 
 
-    for index, row in df.iterrows():
-        if index%10000 == 0:
-            print(f'{100*round(index/ttl_rows, 4)}')
+    for index, row in tqdm(df.iterrows(),total=df.shape[0]):
+        # if index%10000 == 0:
+        #     print(f'{100*round(index/ttl_rows, 4)}') # replace with tqdm
         t, s = row['timeOpen'][:10], row['symbol']
         price_usd_open = row['priceUsd_low']
         next_prices_usd_open = df.iloc[index + 1:index + tf2 + 1, 3].to_list()
