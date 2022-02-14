@@ -2,6 +2,14 @@ import logging
 import colorlog
 
 
+def add_file_handler(file_path, log, formatter) -> None:
+    fileHandler = logging.FileHandler(file_path)
+
+    fileHandler.setFormatter(formatter)
+
+    log.addHandler(fileHandler)
+
+
 log = logging.getLogger('pythonConfig')
 
 log.setLevel(logging.DEBUG)

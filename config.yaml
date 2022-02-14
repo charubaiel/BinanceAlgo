@@ -1,0 +1,12 @@
+loop_params:
+  date_start: '2021-11-15'
+  date_end: '2022-01-15'
+  symbol: ''
+  minutes_to_trade_after_buy: 120
+  avg_price_growth_per_step_limit_pct: 0.5
+  min_price_growth_per_step_limit_pct: -18
+  max_price_growth_per_step_limit_pct: 25
+  back_check_period_length: 29
+  stop_loss_pct_of_price_in: 5
+  bid_pct_of_price_in: 20
+  usd_balance: 100

@@ -5,7 +5,7 @@ import pandas as pd
 from time import sleep
 import os
 import requests
-from data_tools.color_loger import log
+from tools.color_loger import log
 
 
 def try_5_times(func, tries = 5, delay = 3):

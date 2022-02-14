@@ -6,21 +6,21 @@ import json
 from string import ascii_lowercase
 import pandas as pd
 import matplotlib.pyplot as plt
-from data_tools.color_loger import log
-from data_tools.clickhouse_handlers import ch_select
+from tools.clickhouse_handlers import ch_select
+from tools.color_loger import *
 
 
-def get_loop_df(date_start: str, date_end: str, symbol: str = '', pkl_path: str = '') -> pd.DataFrame:
+def get_loop_df(date_start: str, date_end: str, symbol: str = '', use_cache: bool = False) -> pd.DataFrame:
     with open('sql/raw_olh_1m_coins.sql', 'r') as f:
         query = f.read()
 
     query = query.format(date_start=date_start, date_end=date_end, symbol=symbol)
 
-    if pkl_path:
-        df = pd.read_pickle(pkl_path)
+    if use_cache:
+        df = pd.read_pickle('tmp_get_loop_df.pkl')
     else:
         df = ch_select(query)
-        df.to_pickle('tmp.pkl')
+        df.to_pickle('tmp_get_loop_df.pkl')
 
     ttl_rows_in_df = df.shape[0]
 
@@ -29,18 +29,20 @@ def get_loop_df(date_start: str, date_end: str, symbol: str = '', pkl_path: str 
     return df
 
 
-def create_folder_for_logs(loop_params: dict) -> str:
+def create_folder_for_logs(loop_params: dict, log, formatter) -> str:
     run_name = ''.join(choices(ascii_lowercase, k=3))
 
     run_time = datetime.now().strftime('%Y%m%dT%H%M%S')
 
     run_folder_name = f'{run_time}_{run_name}'
-    run_folder_name = 'test'
+    # run_folder_name = 'test'
 
     path_for_logs = f'data_test_loop/{run_folder_name}'
 
     try:
         os.mkdir(path_for_logs)
+
+        add_file_handler(path_for_logs + '/log.txt', log, formatter)
 
     except OSError:
         log.info(f'Creation of the directory failed {path_for_logs}')
@@ -65,31 +67,34 @@ def get_current_point_info(loop_params: dict, index: int, df: pd.DataFrame) -> t
     low_prices_back_list = df.iloc[
                                index - loop_params['back_check_period_length']:
                                index, 3
-                           ].to_list()
+                           ].values
 
     low_prices_ahead_list = df.iloc[
                                 index:
                                 index + loop_params['minutes_to_trade_after_buy'],
                                 3
-                            ].to_list()
+                            ].values
 
     avg_prices_ahead_list = df.iloc[
                                 index:
                                 index + loop_params['minutes_to_trade_after_buy'],
                                 4
-                            ].to_list()
+                            ].values
 
     usd_volumes_back_list = df.iloc[
                                 index - loop_params['back_check_period_length']:
                                 index,
                                 5
-                            ].to_list()
+                            ].values
 
+    # название символа в списке на всем промежутке
+    # просомтра от прошлого до будущего, должен быть одинаковый,
+    # если выборка не захватывает предыдущей символ
     symb_list_info_period = df.iloc[
                                 index - loop_params['back_check_period_length']:
                                 index + loop_params['minutes_to_trade_after_buy'],
                                 0
-                            ].to_list()
+                            ].values
 
     # пропускаем строчку если в рассматриваемый период попали 2 монеты
     # т.е. не рассматриваем границы между разными монетами
@@ -114,62 +119,70 @@ def get_current_point_info(loop_params: dict, index: int, df: pd.DataFrame) -> t
     )
 
 
-def is_under_the_line(low_prices_back_list: list) -> bool:
-    """Check if the second half of prices
-    list is under the first/last prices line
-    """
-    x_list = [i for i in range(int(len(low_prices_back_list) / 2), len(low_prices_back_list))]
-    y_list = low_prices_back_list[int(len(low_prices_back_list) / 2):]
+def get_trade_result(
+    loop_params: dict,
+    low_prices_ahead_list: float,
+    avg_prices_ahead_list: float,
+    usd_balance: float,
+    winning_trades_cnt: int,
+    losing_trades_cnt: int,
+    outoftime_trades_cnt: int,
+    symbol: str,
+    dt: str
+) -> tuple:
 
-    k = (low_prices_back_list[-1] - low_prices_back_list[0]) / (len(low_prices_back_list) - 1)
-    b = low_prices_back_list[0]
+    usd_price_in = avg_prices_ahead_list[0]
 
-    for x, y in zip(x_list, y_list):
-        y0 = k * x + b
+    coins = usd_balance / usd_price_in
 
-        if y > y0:
-            return False
+    traid_stop_loss = usd_price_in - usd_price_in * loop_params['stop_loss_pct_of_price_in'] / 100
+    traid_bid = usd_price_in + usd_price_in * loop_params['bid_pct_of_price_in'] / 100
 
-    return True
+    trade_result = None
+
+    for low_price, avg_price in zip(low_prices_ahead_list, avg_prices_ahead_list):
+
+        if low_price <= traid_stop_loss:
+
+            # usd_out_price = low_price
+            usd_out_price = traid_stop_loss
+            losing_trades_cnt += 1
+            trade_result = 'loss'
+
+            break
+
+        elif avg_price >= traid_bid:
+
+            # usd_out_price = avg_price
+            usd_out_price = traid_bid
+            winning_trades_cnt += 1
+            trade_result = 'win'
+
+            break
+
+    if not trade_result:
+        usd_out_price = avg_prices_ahead_list[-1]
+        outoftime_trades_cnt += 1
+        trade_result = 'outoftime'
+
+    usd_balance_upd = round(coins * usd_out_price)
+
+    usd_trade_profit = round(usd_balance_upd - usd_balance, 2)
+
+    trade_profit_pct = round(usd_balance_upd * 100 / usd_balance - 100, 1)
+
+    trades_cnt = winning_trades_cnt + losing_trades_cnt + outoftime_trades_cnt
+
+    win_trades_pct = round(100 * winning_trades_cnt / trades_cnt, 1)
+
+    log.info(
+        f'{trades_cnt}.\t{trade_result=}\t{usd_balance_upd=}\t{win_trades_pct=}\t{dt}\t{symbol}\t|\t'
+        f'{usd_trade_profit=}\t{trade_profit_pct=}\t{outoftime_trades_cnt=}'
+    )
+
+    return usd_balance_upd, trade_result, winning_trades_cnt, losing_trades_cnt, outoftime_trades_cnt, trade_profit_pct
 
 
-def is_price_growth_above_the_limit(loop_params: dict, low_prices_back_list: list) -> bool:
-    avg_growth_period_limit = loop_params['avg_price_growth_per_step_limit_pct']
-    period_length = loop_params['back_check_period_length']
-
-    min_growth_for_period_limit = avg_growth_period_limit * period_length
-    growth_for_period = (100 * low_prices_back_list[-1] / low_prices_back_list[0]) - 100
-
-    if growth_for_period < min_growth_for_period_limit:
-        return False
-
-    return True
-
-
-def is_stand_fall_growth_limits(loop_params: dict, low_prices_back_list: list) -> bool:
-    min_price_fall_per_step_limit_pct = loop_params['min_price_fall_per_step_limit_pct']
-
-    max_price_growth_per_step_limit_pct = loop_params['max_price_growth_per_step_limit_pct']
-
-    try:
-        # min_price_fall_per_step_pct = min(
-        #     [100 * (p - f) / (p - low_prices_back_list[-1] + 0.00000000001) for f, p in
-        #      zip(low_prices_back_list[1:], low_prices_back_list[:-1])])
-
-        max_price_growth_per_step_pct = max(
-            [100 * (f - p) / (p - low_prices_back_list[-1] + 0.00000000001) for f, p in
-             zip(low_prices_back_list[1:], low_prices_back_list[:-1])])
-
-    except ZeroDivisionError:
-        return False
-
-    # if min_price_fall_per_step_limit_pct <= min_price_fall_per_step_pct:
-    #     return False
-
-    if max_price_growth_per_step_pct >= max_price_growth_per_step_limit_pct:
-        return False
-
-    return True
 
 
 def drow_point_info_png(
@@ -182,7 +195,7 @@ def drow_point_info_png(
         current_symbol: str,
         current_ts: str,
         trade_result: str,
-        trade_gain_result_value_pct: float
+        trade_profit_pct: float
 ) -> None:
 
     low_prices_list_to_drow = df.iloc[
@@ -207,10 +220,10 @@ def drow_point_info_png(
     plt.plot(x_axes_list, low_prices_list_to_drow, color='gray', linewidth=0.5, label='low price')
     plt.plot(x_axes_list, avg_prices_list_to_drow, color='#32383b', linewidth=0.5, label='avg preice')
 
-    plt.suptitle(f"{current_symbol} started in {current_ts} {trade_result} {abs(trade_gain_result_value_pct)}%")
+    plt.suptitle(f"{current_symbol} started in {current_ts} {trade_result} {trade_profit_pct}%")
 
     plt.axvline(x=0 - len(low_prices_back_list), color='#32383b', linewidth=0.5)
-    plt.axvline(x=0, color='#32383b', linewidth=0.5)
+    plt.axvline(x=-1, color='#32383b', linewidth=0.5)
 
     plt.text(
         0 - x_period_end,
