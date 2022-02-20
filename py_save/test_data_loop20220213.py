@@ -65,10 +65,8 @@ if __name__ == "__main__":
         trade_gain_result_value_pct = 5
 
         drow_point_info_png(
-            index,
             loop_params,
             path_for_logs,
-            df,
             low_prices_back_list,
             avg_prices_ahead_list,
             current_symbol,

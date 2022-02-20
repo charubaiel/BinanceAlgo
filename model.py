@@ -14,6 +14,7 @@ if __name__ == "__main__":
     path_for_logs = create_folder_for_logs(loop_params, log, formatter)
 
     df = get_loop_df(
+        'raw_olh_1m_coins',
         loop_params['date_start'],
         loop_params['date_end'],
         loop_params['symbol']
