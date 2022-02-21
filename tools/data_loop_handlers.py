@@ -6,6 +6,8 @@ import json
 from string import ascii_lowercase
 import numpy as np
 import pandas as pd
+# import matplotlib
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from tools.clickhouse_handlers import ch_select
 from tools.color_loger import *
@@ -406,17 +408,21 @@ def drow_point_info_png(
     plt.xlim(xmin=xmin)
     plt.xlim(xmax=loop_params['minutes_to_trade_after_buy'])
 
-    y1min = np.concatenate(
+    y1min_arr = np.concatenate(
         (avg_prices_list_to_drow[xmin-loop_params['minutes_to_trade_after_buy']:], low_prices_list_to_drow),
         axis=None
-    ).min()
+    )
+    y1min = y1min_arr[~np.isnan(y1min_arr)].min()
 
-    y1max = np.concatenate(
+    y1max_arr = np.concatenate(
         (avg_prices_list_to_drow[xmin-loop_params['minutes_to_trade_after_buy']:], high_prices_list_to_drow),
         axis=None
-    ).max()
+    )
+    y1max = y1max_arr[~np.isnan(y1max_arr)].min()
 
-    y2max = ttl_vol_to_drow[xmin:].max()
+
+    y2max_arr = ttl_vol_to_drow[xmin:].max()
+    y2max = y2max_arr[~np.isnan(y2max_arr)].max()
 
     y1.set_ylim([y1min - y1min * 0.001, y1max * 1.001])
     y2.set_ylim([0, y2max * 1.001])

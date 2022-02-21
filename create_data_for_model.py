@@ -19,7 +19,7 @@ if __name__ == "__main__":
         loop_params['date_start'],
         loop_params['date_end'],
         loop_params['symbol'],
-        use_cache=False
+        use_cache=True
     )
 
     prev_ts, prev_symbol, prev_trade_deadline = '', '', ''
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
 
         ch_insert(row_to_insert, 'binanceFastGrowth29m')
-
+        print(row)
         drow_point_info_png(
             loop_params,
             path_for_logs,
