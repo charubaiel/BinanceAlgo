@@ -19,7 +19,7 @@ if __name__ == "__main__":
         loop_params['date_start'],
         loop_params['date_end'],
         loop_params['symbol'],
-        use_cache=True
+        # use_cache=True
     )
 
     prev_ts, prev_symbol, prev_trade_deadline = '', '', ''
