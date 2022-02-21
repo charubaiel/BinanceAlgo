@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
 
         ch_insert(row_to_insert, 'binanceFastGrowth29m')
-        print(row)
+
         drow_point_info_png(
             loop_params,
             path_for_logs,
