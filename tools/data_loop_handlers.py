@@ -418,7 +418,7 @@ def drow_point_info_png(
         (avg_prices_list_to_drow[xmin-loop_params['minutes_to_trade_after_buy']:], high_prices_list_to_drow),
         axis=None
     )
-    y1max = y1max_arr[~np.isnan(y1max_arr)].min()
+    y1max = y1max_arr[~np.isnan(y1max_arr)].max()
 
 
     y2max_arr = ttl_vol_to_drow[xmin:].max()
