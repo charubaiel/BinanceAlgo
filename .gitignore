@@ -3,9 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# logs
-data_test_loop/2*
-
 # graft dir
 py_save/
 
