@@ -431,3 +431,4 @@ def drow_point_info_png(
                 facecolor=y2.get_facecolor(), edgecolor='none')
 
     plt.cla()
+    plt.close('all')
