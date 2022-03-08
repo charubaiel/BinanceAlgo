@@ -8,7 +8,7 @@ import requests
 from tools.color_loger import log
 
 
-def try_5_times(func, tries = 5, delay = 3):
+def try_5_times(func, tries=5, delay=3):
     def wraper(*args, **kwargs):
         for t in range(tries):
             try:
@@ -56,8 +56,8 @@ def ch_insert(data: list, table: str) -> None:
         return
 
     if out.status_code == 500 and 'not enough space' in out.text:
-        requests.post(url = f"{os.getenv('ch_url')}", data = f'OPTIMIZE TABLE {table} FINAL'.encode('utf-8'),
-                      auth = ('ch', os.getenv('ch_ch')))
+        requests.post(url=f"{os.getenv('ch_url')}", data=f'OPTIMIZE TABLE {table} FINAL'.encode('utf-8'),
+                      auth=('ch', os.getenv('ch_ch')))
 
         log.info('Sleep for 30 sec')
         sleep(30)
