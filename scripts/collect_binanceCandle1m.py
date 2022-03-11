@@ -10,28 +10,28 @@ import pandas as pd
 url_ticker = 'https://api.binance.com/api/v3/ticker/bookTicker'
 response = requests.get(url = url_ticker)
 assets_raw = json.loads(response.text)
-start = datetime.strptime('2022-01-18', '%Y-%m-%d')
-end = datetime.strptime('2022-01-26', '%Y-%m-%d')
+start = datetime.strptime('2021-01-01', '%Y-%m-%d')
+end = datetime.strptime('2021-11-01', '%Y-%m-%d')
 eds = pd.date_range(start, end, freq = '12H')
 
-q = f'''
-    with    toDate('{start.strftime("%Y-%m-%d")}') as ds,
-            toDate('{end.strftime("%Y-%m-%d")}') as de,
-            toStartOfHour(timeOpen) as hs,
-            toUInt32(toMinute(timeOpen)/30)*30 as min_to_30min_interval,
-            addMinutes(hs, min_to_30min_interval) as missed_openStart_per_half_hour
-    select
-            distinct symbol
-    from    default.binanceCandle1m
-    where   1=1
-            and timeOpen between ds and addMinutes(de + 1, -1)
-    group   by missed_openStart_per_half_hour, symbol
-    having   uniq(concat(toString(timeOpen), symbol)) = 30
-'''
-print(q)
-symbol_ready_list = [i[0] for i in ch_select(q)]
+# q = f'''
+#     with    toDate('{start.strftime("%Y-%m-%d")}') as ds,
+#             toDate('{end.strftime("%Y-%m-%d")}') as de,
+#             toStartOfHour(timeOpen) as hs,
+#             toUInt32(toMinute(timeOpen)/30)*30 as min_to_30min_interval,
+#             addMinutes(hs, min_to_30min_interval) as missed_openStart_per_half_hour
+#     select
+#             distinct symbol
+#     from    default.binanceCandle1m
+#     where   1=1
+#             and timeOpen between ds and addMinutes(de + 1, -1)
+#     group   by missed_openStart_per_half_hour, symbol
+#     having   uniq(concat(toString(timeOpen), symbol)) = 30
+# '''
+# print(q)
+# symbol_ready_list = [i[0] for i in ch_select(q)]
 
-
+symbol_ready_list = []
 
 for coin in assets_raw:
     if (
@@ -43,10 +43,9 @@ for coin in assets_raw:
     else:
         continue
 
-
     for s, e in zip(eds[:-1], eds[1:]):
-        ts_start = str(int(s.replace(tzinfo = timezone.utc).timestamp() * 1000))
-        ts_end = str(int(e.replace(tzinfo = timezone.utc).timestamp() * 1000) - 1000)
+        ts_start = str(int(s.replace(tzinfo=timezone.utc).timestamp() * 1000))
+        ts_end = str(int(e.replace(tzinfo=timezone.utc).timestamp() * 1000) - 1000)
         print(symbol, s, e)
         candle_data = bn_get_candle(symbol, ts_start, ts_end)
 
