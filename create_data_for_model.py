@@ -21,7 +21,7 @@ if __name__ == "__main__":
             'raw_olh_1m_coins_large',
             loop_params['date_start'],
             loop_params['date_end'],
-            loop_params['symbol'],
+            symbol,
             # use_cache=True
         )
 
