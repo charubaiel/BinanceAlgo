@@ -1,5 +1,5 @@
 loop_params:
-  date_start: '2021-11-01'
+  date_start: '2021-01-01'
   date_end: '2022-01-15'
   symbol: ''
   minutes_to_trade_after_buy: 120

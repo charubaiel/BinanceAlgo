@@ -85,13 +85,13 @@ if __name__ == "__main__":
 
         ch_insert(row_to_insert, 'binanceFastGrowth29m')
 
-        drow_point_info_png(
-            loop_params,
-            path_for_logs,
-            point_info,
-            current_symbol,
-            current_ts
-        )
+        # drow_point_info_png(
+        #     loop_params,
+        #     path_for_logs,
+        #     point_info,
+        #     current_symbol,
+        #     current_ts
+        # )
 
         prev_ts, prev_symbol, prev_trade_deadline = current_ts, current_symbol, trade_deadline
 
