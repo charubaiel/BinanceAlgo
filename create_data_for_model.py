@@ -13,9 +13,6 @@ if __name__ == "__main__":
         loop_params = yaml.safe_load(f)['loop_params']
 
 
-
-
-
     path_for_logs = create_folder_for_logs(loop_params, log, formatter)
 
     for symbol in loop_params['symbol']:

@@ -331,3 +331,4 @@ loop_params:
   stop_loss_pct_of_price_in: 5
   bid_pct_of_price_in: 20
   usd_balance: 100
+
