@@ -14,9 +14,9 @@ sql_name = 'binance_fast_growth_29m'
 with open(f'sql/{sql_name}.sql', 'r') as f:
     query = f.read()
 
-# df = ch_select(query)
+df = ch_select(query)
 # df.to_pickle(f'{sql_name}.pkl')
-df = pd.read_pickle(f'{sql_name}.pkl')
+# df = pd.read_pickle(f'{sql_name}.pkl')
 
 for index, row in df.iterrows():
     ts = row['ts']
